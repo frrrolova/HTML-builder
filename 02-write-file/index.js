@@ -18,8 +18,9 @@ rl.on(
       rl.close();
       return;
     }
-    writeStream.write(input);
-    rl.prompt();
+    writeStream.write(input, () => {
+      rl.prompt();
+    });
   }
 );
 
