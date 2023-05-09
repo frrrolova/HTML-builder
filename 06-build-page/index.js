@@ -10,7 +10,7 @@ mkdir(newFolder, { recursive: true })
 
 function makeAssets(destinationFolder) {
   const assetsFolder = destinationFolder + '/assets';
-  return rm(assetsFolder, { recursive: true })
+  return rm(assetsFolder, { recursive: true, force: true })
     .then(() => mkdir(assetsFolder, { recursive: true }))
     .then(() => copyDirectory(__dirname + '/assets', assetsFolder));
 }
