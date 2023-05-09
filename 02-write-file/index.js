@@ -1,7 +1,8 @@
 const fs = require('fs');
 const readLine = require('readline');
+const { join } = require('path');
 
-const writeStream = fs.createWriteStream(__dirname + '/destination.txt');
+const writeStream = fs.createWriteStream(join(__dirname, 'destination.txt'));
 
 const rl = readLine.createInterface({
   input: process.stdin,

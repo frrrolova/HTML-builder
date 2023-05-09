@@ -1,12 +1,13 @@
 const { readdir, mkdir, copyFile, rm } = require('node:fs/promises');
-const folderCopy = __dirname + '/files-copy';
+const { join } = require('path');
+const folderCopy =join(__dirname,'files-copy');
 
 rm(folderCopy, { recursive: true, force: true })
   .then(() => mkdir(folderCopy, { recursive: true }))
-  .then(() => readdir(__dirname + '/files'))
+  .then(() => readdir(join(__dirname, 'files')))
   .then((files) => {
     files.forEach((file) => {
-      copyFile(__dirname + '/files/' + file, folderCopy + '/' + file);
+      copyFile(join(__dirname, 'files', file), join(folderCopy, file));
     });
   });
 

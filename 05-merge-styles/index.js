@@ -1,25 +1,25 @@
 const { readdir } = require('node:fs/promises');
 const path = require('path');
 const fs = require('fs');
-const filesPath = __dirname + '/styles';
+const filesPath = path.join(__dirname, 'styles');
 
 readdir(filesPath, { withFileTypes: true })
   .then((files) => {
     return files.filter(file => {
-      const extention = path.extname(filesPath + '/' + file.name);
+      const extention = path.extname(path.join(filesPath, file.name));
       return file.isFile() && extention === '.css';
 
     });
   })
   .then((files) => {
-    const filesPromises = files.map((file) => readFile(filesPath + '/' + file.name));
+    const filesPromises = files.map((file) => readFile(path.join(filesPath, file.name)));
     return Promise.all(filesPromises);
   })
   .then((filesContents) => {
     return filesContents.join('\n/*<--------------------------------->*/\n');
   })
   .then((allStyles) => {
-    const writeStream = fs.createWriteStream(__dirname + '/project-dist/bundle.css');
+    const writeStream = fs.createWriteStream(path.join(__dirname, 'project-dist', 'bundle.css'));
     writeStream.write(allStyles);
   });
 

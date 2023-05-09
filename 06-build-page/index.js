@@ -1,7 +1,7 @@
 const { readdir, mkdir, copyFile, rm } = require('node:fs/promises');
-const path = require('path');
+const {extname, parse, join} = require('path');
 const fs = require('fs');
-const newFolder = __dirname + '/project-dist';
+const newFolder = join(__dirname, 'project-dist');
 
 mkdir(newFolder, { recursive: true })
   .then(() => createIndexHtml())
@@ -9,10 +9,11 @@ mkdir(newFolder, { recursive: true })
   .then(() => makeAssets(newFolder));
 
 function makeAssets(destinationFolder) {
-  const assetsFolder = destinationFolder + '/assets';
+  const assetsFolder = join(destinationFolder, 'assets');
+  const currentAssetsFolder = join(__dirname, 'assets');
   return rm(assetsFolder, { recursive: true, force: true })
     .then(() => mkdir(assetsFolder, { recursive: true }))
-    .then(() => copyDirectory(__dirname + '/assets', assetsFolder));
+    .then(() => copyDirectory(currentAssetsFolder, assetsFolder));
 }
 
 function readFile(path) {
@@ -30,18 +31,20 @@ function readFile(path) {
 }
 
 function createIndexHtml() {
-  const componentsFolder = __dirname + '/components';
-  return readFile(__dirname + '/template.html')
+  const componentsFolder = join(__dirname, 'components');
+  const templateFile = join(__dirname, 'template.html');
+
+  return readFile(templateFile)
     .then((templateContent) => {
       return readdir(componentsFolder, { withFileTypes: true })
         .then((files) => {
           return files.filter(file => {
-            const extention = path.extname(componentsFolder + file.name);
+            const extention = extname(componentsFolder + file.name);
             return file.isFile() && extention === '.html';
           });
         })
         .then((componentFiles) => {
-          const componentNames = componentFiles.map((file) => path.parse(componentsFolder + '/' + file.name).name);
+          const componentNames = componentFiles.map((file) => parse(join(componentsFolder, file.name)).name);
 
           const promisesArray = componentNames.map((name) => readFile(`${componentsFolder}/${name}.html`));
 
@@ -55,18 +58,19 @@ function createIndexHtml() {
         });
     })
     .then((templateContent) => {
-      const writeStream = fs.createWriteStream(__dirname + '/project-dist/index.html');
+      const indexFile = join(__dirname, 'project-dist', 'index.html');
+      const writeStream = fs.createWriteStream(indexFile);
       writeStream.write(templateContent);
     });
 }
 
 function mergeStyles() {
-  const filesPath = __dirname + '/styles';
+  const filesPath = join(__dirname, 'styles');
 
   return readdir(filesPath, { withFileTypes: true })
     .then((files) => {
       return files.filter(file => {
-        const extention = path.extname(filesPath + '/' + file.name);
+        const extention = extname(join(filesPath, file.name));
         return file.isFile() && extention === '.css';
       });
     })
@@ -78,7 +82,8 @@ function mergeStyles() {
       return filesContents.join('\n/*<--------------------------------->*/\n');
     })
     .then((allStyles) => {
-      const writeStream = fs.createWriteStream(__dirname + '/project-dist/style.css');
+      const stylesFile = join(__dirname, 'project-dist', 'style.css');
+      const writeStream = fs.createWriteStream(stylesFile);
       writeStream.write(allStyles);
     });
 }
